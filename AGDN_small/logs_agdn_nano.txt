@@ -1,0 +1,321 @@
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Install the latest PowerShell for new features and improvements! https://aka.ms/PSWindows
+
+PS C:\windows\system32> docker run --rm -it -v C:\NPU_Projects:/work -w /work mobilint/qbcompiler:v0.9.0.2-cpu bash
+Unable to find image 'mobilint/qbcompiler:v0.9.0.2-cpu' locally
+v0.9.0.2-cpu: Pulling from mobilint/qbcompiler
+c3420e435e5d: Pull complete
+abc17e50266f: Pull complete
+0eeb1f0a2437: Pull complete
+6414378b6477: Pull complete
+37a97f6b2c9b: Pull complete
+eafd4c0d21b9: Pull complete
+72a630ec2749: Pull complete
+d087113a396e: Pull complete
+51a686976cdc: Pull complete
+590350c4434f: Pull complete
+ab22a94071af: Pull complete
+942e2f896dca: Pull complete
+073a4dc90e8d: Pull complete
+61144d261922: Pull complete
+ebe4f3f41267: Pull complete
+4d38d5fa5e4f: Pull complete
+3979abe91347: Pull complete
+b64e3fcc9e45: Pull complete
+0dd0de8b5f48: Pull complete
+65893b39cb31: Pull complete
+Digest: sha256:3dd899845136e69d7c41d6322a9b16b3e5bfc6702214396f882c8f67b0b838c1
+Status: Downloaded newer image for mobilint/qbcompiler:v0.9.0.2-cpu
+root@2e1023809da3:/work# pip install --no-input /work/qubee-0.10.0.0+aries2-py3-none-any.whl onnx pillow numpy
+python - << 'PY'
+import os, glob, numpy as np
+from PIL import Image
+import onnx
+from qubee.calibration import make_calib_man
+from qubee import mxq_compile
+
+MODEL="agdn_nano.onnx"
+SRC  ="calib_imgs_gayatri"
+CAL  ="calib_sr_gayatri"
+
+# pre_fn: RGB -> 256x256 -> float32 [0,1] (HWC)
+def pre_fn(p):
+    im=Image.open(p).convert("RGB").resize((256,256), Image.BICUBIC)
+    return np.asarray(im, np.float32)/255.0
+
+# clean + build calibration with official maker (required folder structure)
+if os.path.isdir(CAL):
+    import shutil; shutil.rmtree(CAL)
+make_calib_man(pre_ftn=pre_fn,
+               data_dir=SRC,
+               save_dir=".",
+               save_name=CAL,
+               max_size=len(glob.glob(os.path.join(SRC,"*.png"))))
+
+# detect input name & layout -> feed_dict
+m=onnx.load(MODEL); vi=m.graph.input[0]
+iname=vi.name
+dims=[d.dim_value or 1 for d in vi.type.tensor_type.shape.dim]
+PYint("OK") backend="onnx")dn_nano.mxq",er itself)2)}         # NHWC
+Processing ./qubee-0.10.0.0+aries2-py3-none-any.whl
+Requirement already satisfied: onnx in /usr/local/lib/python3.10/dist-packages (1.16.2)
+Requirement already satisfied: pillow in /usr/local/lib/python3.10/dist-packages (11.1.0)
+Requirement already satisfied: numpy in /usr/local/lib/python3.10/dist-packages (1.26.0)
+Requirement already satisfied: msgpack in /usr/local/lib/python3.10/dist-packages (from qubee==0.10.0.0+aries2) (1.1.0)
+Requirement already satisfied: torch>=1.10.1 in /usr/local/lib/python3.10/dist-packages (from qubee==0.10.0.0+aries2) (2.4.1)
+Requirement already satisfied: torchvision>=0.11.2 in /usr/local/lib/python3.10/dist-packages (from qubee==0.10.0.0+aries2) (0.19.1)
+Requirement already satisfied: PyYAML in /usr/local/lib/python3.10/dist-packages (from qubee==0.10.0.0+aries2) (6.0.2)
+Requirement already satisfied: typeguard in /usr/local/lib/python3.10/dist-packages (from qubee==0.10.0.0+aries2) (4.4.1)
+Requirement already satisfied: pycocotools in /usr/local/lib/python3.10/dist-packages (from qubee==0.10.0.0+aries2) (2.0.8)
+Requirement already satisfied: tensorflow>=2.9 in /usr/local/lib/python3.10/dist-packages (from qubee==0.10.0.0+aries2) (2.17.0)
+Requirement already satisfied: protobuf>=3.20.2 in /usr/local/lib/python3.10/dist-packages (from onnx) (4.25.5)
+Requirement already satisfied: opt-einsum>=2.3.2 in /usr/local/lib/python3.10/dist-packages (from tensorflow>=2.9->qubee==0.10.0.0+aries2) (3.4.0)
+Requirement already satisfied: astunparse>=1.6.0 in /usr/local/lib/python3.10/dist-packages (from tensorflow>=2.9->qubee==0.10.0.0+aries2) (1.6.3)
+Requirement already satisfied: ml-dtypes<0.5.0,>=0.3.1 in /usr/local/lib/python3.10/dist-packages (from tensorflow>=2.9->qubee==0.10.0.0+aries2) (0.4.1)
+Requirement already satisfied: grpcio<2.0,>=1.24.3 in /usr/local/lib/python3.10/dist-packages (from tensorflow>=2.9->qubee==0.10.0.0+aries2) (1.69.0)
+Requirement already satisfied: keras>=3.2.0 in /usr/local/lib/python3.10/dist-packages (from tensorflow>=2.9->qubee==0.10.0.0+aries2) (3.8.0)
+Requirement already satisfied: requests<3,>=2.21.0 in /usr/local/lib/python3.10/dist-packages (from tensorflow>=2.9->qubee==0.10.0.0+aries2) (2.32.3)
+Requirement already satisfied: flatbuffers>=24.3.25 in /usr/local/lib/python3.10/dist-packages (from tensorflow>=2.9->qubee==0.10.0.0+aries2) (24.12.23)
+Requirement already satisfied: google-pasta>=0.1.1 in /usr/local/lib/python3.10/dist-packages (from tensorflow>=2.9->qubee==0.10.0.0+aries2) (0.2.0)
+Requirement already satisfied: six>=1.12.0 in /usr/lib/python3/dist-packages (from tensorflow>=2.9->qubee==0.10.0.0+aries2) (1.16.0)
+Requirement already satisfied: libclang>=13.0.0 in /usr/local/lib/python3.10/dist-packages (from tensorflow>=2.9->qubee==0.10.0.0+aries2) (18.1.1)
+Requirement already satisfied: packaging in /usr/local/lib/python3.10/dist-packages (from tensorflow>=2.9->qubee==0.10.0.0+aries2) (24.2)
+Requirement already satisfied: tensorflow-io-gcs-filesystem>=0.23.1 in /usr/local/lib/python3.10/dist-packages (from tensorflow>=2.9->qubee==0.10.0.0+aries2) (0.37.1)
+Requirement already satisfied: gast!=0.5.0,!=0.5.1,!=0.5.2,>=0.2.1 in /usr/local/lib/python3.10/dist-packages (from tensorflow>=2.9->qubee==0.10.0.0+aries2) (0.6.0)
+Requirement already satisfied: termcolor>=1.1.0 in /usr/local/lib/python3.10/dist-packages (from tensorflow>=2.9->qubee==0.10.0.0+aries2) (2.5.0)
+Requirement already satisfied: h5py>=3.10.0 in /usr/local/lib/python3.10/dist-packages (from tensorflow>=2.9->qubee==0.10.0.0+aries2) (3.12.1)
+Requirement already satisfied: tensorboard<2.18,>=2.17 in /usr/local/lib/python3.10/dist-packages (from tensorflow>=2.9->qubee==0.10.0.0+aries2) (2.17.1)
+Requirement already satisfied: typing-extensions>=3.6.6 in /usr/local/lib/python3.10/dist-packages (from tensorflow>=2.9->qubee==0.10.0.0+aries2) (4.12.2)
+Requirement already satisfied: setuptools in /usr/lib/python3/dist-packages (from tensorflow>=2.9->qubee==0.10.0.0+aries2) (59.6.0)
+Requirement already satisfied: wrapt>=1.11.0 in /usr/local/lib/python3.10/dist-packages (from tensorflow>=2.9->qubee==0.10.0.0+aries2) (1.17.2)
+Requirement already satisfied: absl-py>=1.0.0 in /usr/local/lib/python3.10/dist-packages (from tensorflow>=2.9->qubee==0.10.0.0+aries2) (2.1.0)
+Requirement already satisfied: nvidia-cusolver-cu12==11.4.5.107 in /usr/local/lib/python3.10/dist-packages (from torch>=1.10.1->qubee==0.10.0.0+aries2) (11.4.5.107)
+Requirement already satisfied: nvidia-cufft-cu12==11.0.2.54 in /usr/local/lib/python3.10/dist-packages (from torch>=1.10.1->qubee==0.10.0.0+aries2) (11.0.2.54)
+Requirement already satisfied: fsspec in /usr/local/lib/python3.10/dist-packages (from torch>=1.10.1->qubee==0.10.0.0+aries2) (2024.9.0)
+Requirement already satisfied: networkx in /usr/local/lib/python3.10/dist-packages (from torch>=1.10.1->qubee==0.10.0.0+aries2) (3.4.2)
+Requirement already satisfied: nvidia-cublas-cu12==12.1.3.1 in /usr/local/lib/python3.10/dist-packages (from torch>=1.10.1->qubee==0.10.0.0+aries2) (12.1.3.1)
+Requirement already satisfied: triton==3.0.0 in /usr/local/lib/python3.10/dist-packages (from torch>=1.10.1->qubee==0.10.0.0+aries2) (3.0.0)
+Requirement already satisfied: jinja2 in /usr/local/lib/python3.10/dist-packages (from torch>=1.10.1->qubee==0.10.0.0+aries2) (3.1.5)
+Requirement already satisfied: nvidia-cudnn-cu12==9.1.0.70 in /usr/local/lib/python3.10/dist-packages (from torch>=1.10.1->qubee==0.10.0.0+aries2) (9.1.0.70)
+Requirement already satisfied: nvidia-curand-cu12==10.3.2.106 in /usr/local/lib/python3.10/dist-packages (from torch>=1.10.1->qubee==0.10.0.0+aries2) (10.3.2.106)
+Requirement already satisfied: nvidia-nvtx-cu12==12.1.105 in /usr/local/lib/python3.10/dist-packages (from torch>=1.10.1->qubee==0.10.0.0+aries2) (12.1.105)
+Requirement already satisfied: nvidia-cusparse-cu12==12.1.0.106 in /usr/local/lib/python3.10/dist-packages (from torch>=1.10.1->qubee==0.10.0.0+aries2) (12.1.0.106)
+Requirement already satisfied: nvidia-cuda-runtime-cu12==12.1.105 in /usr/local/lib/python3.10/dist-packages (from torch>=1.10.1->qubee==0.10.0.0+aries2) (12.1.105)
+Requirement already satisfied: filelock in /usr/local/lib/python3.10/dist-packages (from torch>=1.10.1->qubee==0.10.0.0+aries2) (3.16.1)
+Requirement already satisfied: nvidia-cuda-nvrtc-cu12==12.1.105 in /usr/local/lib/python3.10/dist-packages (from torch>=1.10.1->qubee==0.10.0.0+aries2) (12.1.105)
+Requirement already satisfied: nvidia-nccl-cu12==2.20.5 in /usr/local/lib/python3.10/dist-packages (from torch>=1.10.1->qubee==0.10.0.0+aries2) (2.20.5)
+Requirement already satisfied: nvidia-cuda-cupti-cu12==12.1.105 in /usr/local/lib/python3.10/dist-packages (from torch>=1.10.1->qubee==0.10.0.0+aries2) (12.1.105)
+Requirement already satisfied: sympy in /usr/local/lib/python3.10/dist-packages (from torch>=1.10.1->qubee==0.10.0.0+aries2) (1.13.3)
+Requirement already satisfied: nvidia-nvjitlink-cu12 in /usr/local/lib/python3.10/dist-packages (from nvidia-cusolver-cu12==11.4.5.107->torch>=1.10.1->qubee==0.10.0.0+aries2) (12.6.85)
+Requirement already satisfied: matplotlib>=2.1.0 in /usr/local/lib/python3.10/dist-packages (from pycocotools->qubee==0.10.0.0+aries2) (3.10.0)
+Requirement already satisfied: wheel<1.0,>=0.23.0 in /usr/lib/python3/dist-packages (from astunparse>=1.6.0->tensorflow>=2.9->qubee==0.10.0.0+aries2) (0.37.1)
+Requirement already satisfied: namex in /usr/local/lib/python3.10/dist-packages (from keras>=3.2.0->tensorflow>=2.9->qubee==0.10.0.0+aries2) (0.0.8)
+Requirement already satisfied: optree in /usr/local/lib/python3.10/dist-packages (from keras>=3.2.0->tensorflow>=2.9->qubee==0.10.0.0+aries2) (0.14.0)
+Requirement already satisfied: rich in /usr/local/lib/python3.10/dist-packages (from keras>=3.2.0->tensorflow>=2.9->qubee==0.10.0.0+aries2) (13.9.4)
+Requirement already satisfied: pyparsing>=2.3.1 in /usr/lib/python3/dist-packages (from matplotlib>=2.1.0->pycocotools->qubee==0.10.0.0+aries2) (2.4.7)
+Requirement already satisfied: contourpy>=1.0.1 in /usr/local/lib/python3.10/dist-packages (from matplotlib>=2.1.0->pycocotools->qubee==0.10.0.0+aries2) (1.3.1)
+Requirement already satisfied: cycler>=0.10 in /usr/local/lib/python3.10/dist-packages (from matplotlib>=2.1.0->pycocotools->qubee==0.10.0.0+aries2) (0.12.1)
+Requirement already satisfied: kiwisolver>=1.3.1 in /usr/local/lib/python3.10/dist-packages (from matplotlib>=2.1.0->pycocotools->qubee==0.10.0.0+aries2) (1.4.8)
+Requirement already satisfied: python-dateutil>=2.7 in /usr/local/lib/python3.10/dist-packages (from matplotlib>=2.1.0->pycocotools->qubee==0.10.0.0+aries2) (2.9.0.post0)
+Requirement already satisfied: fonttools>=4.22.0 in /usr/local/lib/python3.10/dist-packages (from matplotlib>=2.1.0->pycocotools->qubee==0.10.0.0+aries2) (4.55.3)
+Requirement already satisfied: urllib3<3,>=1.21.1 in /usr/local/lib/python3.10/dist-packages (from requests<3,>=2.21.0->tensorflow>=2.9->qubee==0.10.0.0+aries2) (2.3.0)
+Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.10/dist-packages (from requests<3,>=2.21.0->tensorflow>=2.9->qubee==0.10.0.0+aries2) (3.10)
+Requirement already satisfied: charset-normalizer<4,>=2 in /usr/local/lib/python3.10/dist-packages (from requests<3,>=2.21.0->tensorflow>=2.9->qubee==0.10.0.0+aries2) (3.4.1)
+Requirement already satisfied: certifi>=2017.4.17 in /usr/local/lib/python3.10/dist-packages (from requests<3,>=2.21.0->tensorflow>=2.9->qubee==0.10.0.0+aries2) (2024.12.14)
+Requirement already satisfied: markdown>=2.6.8 in /usr/local/lib/python3.10/dist-packages (from tensorboard<2.18,>=2.17->tensorflow>=2.9->qubee==0.10.0.0+aries2) (3.7)
+Requirement already satisfied: tensorboard-data-server<0.8.0,>=0.7.0 in /usr/local/lib/python3.10/dist-packages (from tensorboard<2.18,>=2.17->tensorflow>=2.9->qubee==0.10.0.0+aries2) (0.7.2)
+Requirement already satisfied: werkzeug>=1.0.1 in /usr/local/lib/python3.10/dist-packages (from tensorboard<2.18,>=2.17->tensorflow>=2.9->qubee==0.10.0.0+aries2) (3.1.3)
+Requirement already satisfied: MarkupSafe>=2.0 in /usr/local/lib/python3.10/dist-packages (from jinja2->torch>=1.10.1->qubee==0.10.0.0+aries2) (3.0.2)
+Requirement already satisfied: mpmath<1.4,>=1.1.0 in /usr/local/lib/python3.10/dist-packages (from sympy->torch>=1.10.1->qubee==0.10.0.0+aries2) (1.3.0)
+Requirement already satisfied: pygments<3.0.0,>=2.13.0 in /usr/local/lib/python3.10/dist-packages (from rich->keras>=3.2.0->tensorflow>=2.9->qubee==0.10.0.0+aries2) (2.19.1)
+Requirement already satisfied: markdown-it-py>=2.2.0 in /usr/local/lib/python3.10/dist-packages (from rich->keras>=3.2.0->tensorflow>=2.9->qubee==0.10.0.0+aries2) (3.0.0)
+Requirement already satisfied: mdurl~=0.1 in /usr/local/lib/python3.10/dist-packages (from markdown-it-py>=2.2.0->rich->keras>=3.2.0->tensorflow>=2.9->qubee==0.10.0.0+aries2) (0.1.2)
+Installing collected packages: qubee
+Successfully installed qubee-0.10.0.0
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+Making Numpy File: 100%|████████████████████████████████████████████████████████████████| 50/50 [00:00<00:00, 57.05it/s]
+Preparing Calibration TXT File: 100%|██████████████████████████████████████████████| 50/50 [00:00<00:00, 1978445.28it/s]
+[⣾] Parsing deep learning model....[2025-11-26 07:35:02] qubee.model_dict.parser.backend.onnx._inference : [INFO] run onnx inference session
+[⣻] Parsing deep learning model......[2025-11-26 07:35:03] qubee.model_dict.parser.backend.onnx._inference : [INFO] onnx inference session done.
+[2025-11-26 07:35:03] qubee.model_dict.parser.parser : [INFO] [parser] Load and set dformat model done.
+[2025-11-26 07:35:03] qubee.model_dict.parser.parser : [INFO] [parser]
+===========================================================
+           Summary by Operator Type[Model Loaded]
+===========================================================
+        OpType        | Count | Unsupported | Supported(%)
+----------------------+-------+-------------+--------------
+Adding                |      8|            8|          0.00
+Concatenate           |     12|           12|          0.00
+Convolution           |     63|           63|          0.00
+DepthwiseConvolution  |     25|           25|          0.00
+Input                 |      1|            1|          0.00
+Multiply              |     36|           36|          0.00
+Output                |      1|            1|          0.00
+ReduceMean            |     12|           12|          0.00
+Sigmoid               |     36|           36|          0.00
+Split                 |     12|           12|          0.00
+----------------------+-------+-------------+--------------
+All                   |    206|          206|          0.00
+===========================================================
+[2025-11-26 07:35:03] qubee.model_dict.parser.parser : [INFO] [parser]
+Number of Subgraphs: 1
+graph order: [0]
+stateful_lstm_subgraphs: {}
+backend: onnx
+model inputs: ['name: input, src_shape: (1,3,256,256), dataformat: NCHW, origin_name: ']
+model outputs: ['name: output, src_shape: (1,3,256,256), dataformat: NCHW, origin_name: ']
+[2025-11-26 07:35:03] qubee.model_dict.parser.parser : [INFO] outputs:
+
+[⣽] Parsing deep learning model.....
+[2025-11-26 07:35:04] qubee.model_dict.parser.parser : [INFO] [parser]
+===========================================================
+Summary by Operator Type[HL compilation done. Device=Aries2]
+===========================================================
+        OpType        | Count | Unsupported | Supported(%)
+----------------------+-------+-------------+--------------
+Adding                |      8|            0|        100.00
+Concatenate           |     18|            0|        100.00
+Convolution           |     81|            0|        100.00
+DepthwiseConvolution  |     25|            0|        100.00
+Input                 |      1|            0|        100.00
+Multiply              |     12|            0|        100.00
+Output                |      1|            0|        100.00
+Pooling               |      6|            0|        100.00
+Sigmoid               |     12|            0|        100.00
+Swish                 |     30|            0|        100.00
+----------------------+-------+-------------+--------------
+All                   |    194|            0|        100.00
+===========================================================
+[2025-11-26 07:35:04] qubee.model_dict.parser.parser : [INFO] [parser]
+Number of Subgraphs: 1
+graph order: [0]
+stateful_lstm_subgraphs: {}
+backend: onnx
+model inputs: ['name: input_0, src_shape: (1,256,256,3), dataformat: NHWC, origin_name: input']
+model outputs: ['name: add_1, src_shape: (1,256,256,3), dataformat: NHWC, origin_name: output']
+[2025-11-26 07:35:04] qubee.model_dict.parser.parser : [INFO] outputs:
+
+[2025-11-26 07:35:04] qubee.model_dict.parser.parser : [INFO] agdn_nano model's number of operations 3.2298 GOPS, 1.6149 MACs
+[2025-11-26 07:35:04] qubee.model_dict.parser.parser : [INFO] ================================================================================
+[2025-11-26 07:35:04] qubee.model_dict.parser.parser : [INFO]   Supported: 3.2298 GOPS, 1.6149 MACs
+[2025-11-26 07:35:04] qubee.model_dict.parser.parser : [INFO]   Unsupported: 0.0000 GOPS, 0.0000 MACs
+[2025-11-26 07:35:04] qubee.model_dict.parser.parser : [INFO] ================================================================================
+[2025-11-26 07:35:04] qubee.compiler.compiler : [INFO] write intermediate file: /tmp/qubee/frontend/48ba7e4d-1ff7-4fd9-8716-970ba2b67915/model.mblt done.
+✔ Parsing deep learning model... Done!
+Preparing Calibration TXT File: 100%|██████████████████████████████████████████████| 50/50 [00:00<00:00, 1426634.01it/s]
+[2025-11-26 07:35:05.341] Setting Quantizer Config...
+OPTQ config is found
+optq apply false
+minOutputDiff config is found
+transformerQuant is found
+bitAllocation config is found
+quantLayer config is found
+llm config is found
+reduceGPU config is found
+[2025-11-26 07:35:05.343] Performing Quantization...
+[2025-11-26 07:35:05.357] complete high-level model optimizing
+[2025-11-26 07:35:05.357] Try to load calibration data set from dataset txt. Dataset txt file path = /tmp/tmp44vcile2.txt
+[2025-11-26 07:35:05.357] There are 50 files in txt file.
+[2025-11-26 07:35:05.798] Complete load calibration data. Success = 50, Fail = 0
+[2025-11-26 07:35:05.799] Load calibration data Time = 0.43568534 sec
+[2025-11-26 07:35:37.177] apply reduceLUT /blocks.1/conv_in/pw/Conv_output_0_0_act/slice;tan, act: Swish
+[2025-11-26 07:35:37.188] apply reduceLUT /blocks.2/conv_distill/pw/Conv_output_0_0_act, act: Swish
+[2025-11-26 07:35:37.190] apply reduceLUT /blocks.2/conv_remain/pw/Conv_output_0_0_act, act: Swish
+[2025-11-26 07:35:37.197] apply reduceLUT /blocks.3/conv_in/pw/Conv_output_0_0_act/slice;tan, act: Swish
+[2025-11-26 07:35:37.209] apply reduceLUT /blocks.4/conv_distill/pw/Conv_output_0_0_act, act: Swish
+[2025-11-26 07:35:37.219] apply reduceLUT /blocks.5/conv_in/pw/Conv_output_0_0_act/slice;tan, act: Swish
+[2025-11-26 07:35:37.220] apply reduceLUT /blocks.5/conv_distill/pw/Conv_output_0_0_act, act: Swish
+[2025-11-26 07:35:37.221] apply reduceLUT /blocks.5/conv_remain/pw/Conv_output_0_0_act, act: Swish
+[2025-11-26 07:35:37.223] apply reduceLUT /blocks.5/ca_conv1/Conv_output_0_0_act, act: Swish
+
+================ Input Information ===============
+Input Name        = input_0
+Input Shape       = [256, 256, 3]
+Reshaped Shape    = [256, 256, 3]
+==================================================
+
+================ Output Information ==============
+Output Name       = add_1
+Output Shape      = [256, 256, 3]
+==================================================
+[2025-11-26 07:35:37.300] Compiling the Quantized model...
+[2025-11-26 07:35:37.303] <<<<<<<<<<<<<<<<<<<<<<[Banckend Compiler] Runtime Config Initialized: 1>>>>>>>>>>>>>>>>>>>>>>
+[2025-11-26 07:35:37.307] HW: Aries2, Build Mode: Single, target: 00
+[2025-11-26 07:35:37.321] optimize network finished
+load_weights [**************************] 100% layer181
+init_div [******************************] 100%
+opt_div [*******************************] 100%
+[2025-11-26 07:35:37.483] optimize division finished
+rearrange weights [*********************] 100%
+[2025-11-26 07:35:38.086] Build Finished.
+[2025-11-26 07:35:38.092] <<<<<<<<<<<<<<<<<<<<<<[Banckend Compiler] Runtime Config Initialized: 2>>>>>>>>>>>>>>>>>>>>>>
+[2025-11-26 07:35:38.094] HW: Aries2, Build Mode: Single, target: 01
+[2025-11-26 07:35:38.104] optimize network finished
+load_weights [**************************] 100% layer181
+rearrange weights [*********************] 100%
+[2025-11-26 07:35:38.704] Build Finished.
+[2025-11-26 07:35:38.716] <<<<<<<<<<<<<<<<<<<<<<[Banckend Compiler] Runtime Config Initialized: 3>>>>>>>>>>>>>>>>>>>>>>
+[2025-11-26 07:35:38.717] HW: Aries2, Build Mode: Single, target: 02
+[2025-11-26 07:35:38.727] optimize network finished
+load_weights [**************************] 100% layer181
+rearrange weights [*********************] 100%
+[2025-11-26 07:35:39.330] Build Finished.
+[2025-11-26 07:35:39.349] <<<<<<<<<<<<<<<<<<<<<<[Banckend Compiler] Runtime Config Initialized: 4>>>>>>>>>>>>>>>>>>>>>>
+[2025-11-26 07:35:39.350] HW: Aries2, Build Mode: Single, target: 03
+[2025-11-26 07:35:39.361] optimize network finished
+load_weights [**************************] 100% layer181
+rearrange weights [*********************] 100%
+[2025-11-26 07:35:39.979] Build Finished.
+[2025-11-26 07:35:40.008] <<<<<<<<<<<<<<<<<<<<<<[Banckend Compiler] Runtime Config Initialized: 5>>>>>>>>>>>>>>>>>>>>>>
+[2025-11-26 07:35:40.010] HW: Aries2, Build Mode: Single, target: 10
+[2025-11-26 07:35:40.019] optimize network finished
+load_weights [**************************] 100% layer172
+rearrange weights [*********************] 100%
+[2025-11-26 07:35:40.620] Build Finished.
+[2025-11-26 07:35:40.662] <<<<<<<<<<<<<<<<<<<<<<[Banckend Compiler] Runtime Config Initialized: 6>>>>>>>>>>>>>>>>>>>>>>
+[2025-11-26 07:35:40.663] HW: Aries2, Build Mode: Single, target: 11
+[2025-11-26 07:35:40.673] optimize network finished
+load_weights [**************************] 100% layer181
+rearrange weights [*********************] 100%
+[2025-11-26 07:35:41.295] Build Finished.
+[2025-11-26 07:35:41.355] <<<<<<<<<<<<<<<<<<<<<<[Banckend Compiler] Runtime Config Initialized: 7>>>>>>>>>>>>>>>>>>>>>>
+[2025-11-26 07:35:41.357] HW: Aries2, Build Mode: Single, target: 12
+[2025-11-26 07:35:41.368] optimize network finished
+load_weights [**************************] 100% layer181
+rearrange weights [*********************] 100%
+[2025-11-26 07:35:41.973] Build Finished.
+[2025-11-26 07:35:42.051] <<<<<<<<<<<<<<<<<<<<<<[Banckend Compiler] Runtime Config Initialized: 8>>>>>>>>>>>>>>>>>>>>>>
+[2025-11-26 07:35:42.052] HW: Aries2, Build Mode: Single, target: 13
+[2025-11-26 07:35:42.064] optimize network finished
+load_weights [**************************] 100% layer171
+rearrange weights [*********************] 100%
+[2025-11-26 07:35:42.674] Build Finished.
+[2025-11-26 07:35:42.832] Elaborating MXQ...
+[2025-11-26 07:35:42.838] Exporting MXQ...
+[2025-11-26 07:35:42.875] Verifying exported MXQ file...
+[2025-11-26 07:35:43.027] Compilation was successful.
+OK
+
+
+
+
+
+==============================================================================================================
+
+PS C:\NPU_Projects> python3.12 inference_updated_gayatri.py
+CPU failed: No module named 'onnxruntime'
+* PCIe Device Driver connection details.
+        > Driver version : 1.7.4 (Revision 1)
+        > PCIe Cards connection information.
+                 - Main-System(VID:0x209F,DID:0x0000), Sub-System(VID:0x0401,DID:0x1093), PCIe 3.0 - 8 Lanes
+
+I1125 14:41:25.684 25548 model_impl.cc:846] Model constructed. (agdn_nano.mxq)
+I1125 14:41:25.721 25548 model_impl.cc:1135] Model launched.
+I1125 14:41:31.745 25548 model_impl.cc:1154] Model disposed.
+NPU 60.02 ms/img (16.7 img/s)
+PSNR(rgb) mean: 21.93 dB over 100 images
+PS C:\NPU_Projects>
+
+
