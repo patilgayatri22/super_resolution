@@ -1,0 +1,45 @@
+python - << 'PY'
+import os, glob, numpy as np
+from PIL import Image
+import onnx
+from qubee.calibration import make_calib_man
+from qubee import mxq_compile
+
+MODEL="vpeg_nano.onnx"
+SRC  ="calib_imgs_gayatri"
+CAL  ="calib_sr_gayatri_npy"
+
+# pre_fn: RGB -> 256x256 -> float32 [0,1] (HWC)
+def pre_fn(p):
+    im=Image.open(p).convert("RGB").resize((256,256), Image.BICUBIC)
+    return np.asarray(im, np.float32)/255.0
+
+# clean + build calibration with official maker (required folder structure)
+if os.path.isdir(CAL):
+    import shutil; shutil.rmtree(CAL)
+make_calib_man(pre_ftn=pre_fn,
+               data_dir=SRC,
+               save_dir=".",
+               save_name=CAL,
+               max_size=len(glob.glob(os.path.join(SRC,"*.png"))))
+
+# detect input name & layout -> feed_dict
+m=onnx.load(MODEL); vi=m.graph.input[0]
+iname=vi.name
+dims=[d.dim_value or 1 for d in vi.type.tensor_type.shape.dim]
+if len(dims)==4 and dims[1] in (1,3):
+    feed={iname: np.zeros((1,3,256,256), np.float32)}         # NCHW
+else:
+    feed={iname: np.zeros((1,256,256,3), np.float32)}         # NHWC
+
+# compile ONNX -> MXQ (point to CAL folder itself)
+mxq_compile(model=MODEL,
+            save_dir=".",
+            save_name="compile_gayatrip",
+            calib_data_path=CAL,
+            output_name="vpeg_nano.mxq",
+            verbose=True,
+            feed_dict=feed,
+            backend="onnx")
+print("OK")
+PY
