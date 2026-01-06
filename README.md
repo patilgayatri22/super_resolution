@@ -16,3 +16,30 @@ The goal is to reconstruct high-resolution images that are sharper and more visu
 ### VGEP
 **VGEP (Vision-Guided Enhancement Pipeline)** aims to further improve reconstructed quality by using a multi-stage enhancement method — combining learned features with perceptual guidance.
 
+## Installation
+
+To get started, clone this repository:
+
+```bash
+git clone https://github.com/patilgayatri22/super_resolution.git
+cd super_resolution
+
+## Models
+
+Contributing
+
+If you’d like to contribute:
+
+ Fork the repo
+
+ Create a feature branch (git checkout -b feature/YourFeature)
+
+ Commit your changes (git commit -m "Add feature")
+
+ Push (git push origin feature/YourFeature)
+
+ Open a Pull Request
+
+## License
+
+This project is open-source under the MIT License
