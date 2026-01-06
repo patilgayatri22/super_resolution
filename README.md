@@ -31,21 +31,19 @@ cd super_resolution
 Common metrics used for super-resolution quality evaluation:
 PSNR	(Peak Signal-to-Noise Ratio)
 
-## Models
-
-Contributing
+## Contributing
 
 If you’d like to contribute:
 
- Fork the repo
+- Fork the repo
 
- Create a feature branch (git checkout -b feature/YourFeature)
+- Create a feature branch (git checkout -b feature/YourFeature)
 
- Commit your changes (git commit -m "Add feature")
+- Commit your changes (git commit -m "Add feature")
 
- Push (git push origin feature/YourFeature)
+- Push (git push origin feature/YourFeature)
 
- Open a Pull Request
+- Open a Pull Request
 
 ## License
 
