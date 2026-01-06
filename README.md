@@ -22,7 +22,9 @@ To get started, clone this repository:
 
 ```bash
 git clone https://github.com/patilgayatri22/super_resolution.git
-cd super_resolution ```
+cd super_resolution
+
+```
 
 ## Evaluation Metrics
 
